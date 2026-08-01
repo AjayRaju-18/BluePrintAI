@@ -1,80 +1,86 @@
 """
-POST /api/extract — stub router.
+POST /api/extract/{drawing_id}
 
-Accepts a multipart file upload (PDF or image) and returns a placeholder
-ExtractedDrawingData response. Business logic will be implemented in a
-future milestone.
+Sends the stored PNG render (plus text layer if available) to the
+Hugging Face Inference API (Qwen/Qwen2.5-VL-7B-Instruct) and returns
+structured ExtractedDrawingData parsed from the model's JSON output.
+
+On any failure (network, bad JSON, schema mismatch) the endpoint returns
+HTTP 200 with status='error' and a clear human-readable message rather
+than retrying. The caller decides what to do.
+
+Also exposes:
+  GET /api/extract/{drawing_id}/result — retrieve a previously stored result.
 """
 
 from __future__ import annotations
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+import json
 
-from app.schemas import (
-    Dimension,
-    ExtractedDrawingData,
-    GDTCallout,
-    SurfaceFinish,
-)
+from fastapi import APIRouter, HTTPException, status
+
+from app.schemas import ExtractionResult
+from app.services.extraction_service import run_extraction
+from app.services.drawing_service import STORAGE_ROOT
 
 router = APIRouter(tags=["extraction"])
 
-_ALLOWED_CONTENT_TYPES = {
-    "application/pdf",
-    "image/png",
-    "image/jpeg",
-    "image/tiff",
-    "image/webp",
-}
+
+# ── POST /api/extract/{drawing_id} ─────────────────────────────────────────────
 
 
 @router.post(
-    "/extract",
-    response_model=ExtractedDrawingData,
-    summary="Extract structured data from an engineering drawing",
+    "/extract/{drawing_id}",
+    response_model=ExtractionResult,
+    summary="Run AI extraction on an uploaded drawing",
     status_code=status.HTTP_200_OK,
 )
-async def extract_drawing(
-    file: UploadFile = File(..., description="PDF or raster image of the drawing."),
-) -> ExtractedDrawingData:
+async def extract_drawing(drawing_id: str) -> ExtractionResult:
     """
-    **[STUB]** Accepts a drawing file and returns placeholder extracted data.
+    Sends the 300-DPI PNG (and optional text layer) for *drawing_id* to the
+    Hugging Face Inference API running **Qwen/Qwen2.5-VL-7B-Instruct**.
 
-    In the real implementation this endpoint will:
-    1. Decode the uploaded PDF/image with PyMuPDF / Pillow.
-    2. Send the page image to a Hugging Face vision-language model via httpx.
-    3. Parse the model response into an `ExtractedDrawingData` object.
-    4. Return the structured result to the frontend.
+    The model is instructed to return a JSON object matching the shared
+    `ExtractedDrawingData` schema with normalized bounding boxes.
+
+    - **On success** → `status='ok'`, `data` contains the parsed extraction.
+    - **On failure** → `status='error'`, `error_message` explains why.
+      `raw_response` is included when the model returned something but it
+      failed to parse, so you can inspect what went wrong.
+
+    The result is always written to `storage/<drawing_id>/extraction.json`.
     """
-    if file.content_type not in _ALLOWED_CONTENT_TYPES:
+    _require_drawing(drawing_id)
+    result = await run_extraction(drawing_id)
+    return result
+
+
+# ── GET /api/extract/{drawing_id}/result ──────────────────────────────────────
+
+
+@router.get(
+    "/extract/{drawing_id}/result",
+    response_model=ExtractionResult,
+    summary="Retrieve a previously stored extraction result",
+)
+async def get_extraction_result(drawing_id: str) -> ExtractionResult:
+    """Returns the `ExtractionResult` that was persisted during a prior extraction call."""
+    _require_drawing(drawing_id)
+    result_path = STORAGE_ROOT / drawing_id / "extraction.json"
+    if not result_path.is_file():
         raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail=(
-                f"Unsupported file type '{file.content_type}'. "
-                f"Accepted types: {sorted(_ALLOWED_CONTENT_TYPES)}"
-            ),
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No extraction result found for drawing '{drawing_id}'. Run POST /api/extract/{drawing_id} first.",
         )
+    return ExtractionResult.model_validate_json(result_path.read_text(encoding="utf-8"))
 
-    # ── Placeholder response (no real processing) ──────────────────────────────
-    return ExtractedDrawingData(
-        part_name="[STUB] Part Name",
-        material="[STUB] Material",
-        scale="1:1",
-        revision="A",
-        quantity="1",
-        dimensions=[
-            Dimension(value="25.40", tolerance="±0.05", bbox=[0.1, 0.2, 0.05, 0.03])
-        ],
-        gdt_callouts=[
-            GDTCallout(
-                characteristic="flatness",
-                tolerance_zone="0.02",
-                datum_refs="A",
-                bbox=[0.3, 0.4, 0.08, 0.04],
-            )
-        ],
-        surface_finish=[
-            SurfaceFinish(value="Ra 1.6", bbox=[0.5, 0.6, 0.04, 0.03])
-        ],
-        notes=["[STUB] This is a placeholder response. No real extraction performed."],
-    )
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
+
+
+def _require_drawing(drawing_id: str) -> None:
+    if not (STORAGE_ROOT / drawing_id).is_dir():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Drawing '{drawing_id}' not found. Upload it first via POST /api/upload.",
+        )

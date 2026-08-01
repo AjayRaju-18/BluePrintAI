@@ -57,7 +57,7 @@ class SurfaceFinish(BaseModel):
     bbox: BBox
 
 
-# ── Top-level response model ───────────────────────────────────────────────────
+# ── Top-level extraction model ─────────────────────────────────────────────────
 
 
 class ExtractedDrawingData(BaseModel):
@@ -121,3 +121,28 @@ class UploadResponse(BaseModel):
         description="URL to fetch the rendered PNG preview.",
     )
     created_at: str
+
+
+# ── Extraction result model ────────────────────────────────────────────────────
+
+
+class ExtractionResult(BaseModel):
+    """
+    Envelope returned by POST /api/extract/{drawing_id}.
+
+    On success: status='ok',  data=ExtractedDrawingData, error_message=None.
+    On failure: status='error', data=None, error_message=<human-readable reason>.
+    """
+
+    drawing_id: str
+    status: Literal["ok", "error"]
+    data: ExtractedDrawingData | None = None
+    error_message: str | None = Field(
+        None,
+        description="Human-readable failure reason (only when status='error').",
+    )
+    raw_response: str | None = Field(
+        None,
+        description="Raw model output — present on parse errors to aid debugging.",
+    )
+    extracted_at: str = Field(..., description="ISO-8601 UTC timestamp.")

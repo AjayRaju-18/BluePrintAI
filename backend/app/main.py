@@ -6,7 +6,8 @@ Routes registered here:
   POST /api/upload                       → ingest PDF/image, return drawing_id
   GET  /api/drawing/{id}/preview         → serve 300-DPI PNG render
   GET  /api/drawing/{id}/meta            → return DrawingMeta JSON
-  POST /api/extract                      → (stub) drawing extraction
+  POST /api/extract/{drawing_id}         → run VLM extraction, return ExtractionResult
+  GET  /api/extract/{drawing_id}/result  → retrieve stored ExtractionResult
 """
 
 from __future__ import annotations
