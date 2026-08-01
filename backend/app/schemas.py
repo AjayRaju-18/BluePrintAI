@@ -146,3 +146,63 @@ class ExtractionResult(BaseModel):
         description="Raw model output — present on parse errors to aid debugging.",
     )
     extracted_at: str = Field(..., description="ISO-8601 UTC timestamp.")
+
+
+# ── Drawing detail (GET /api/drawings/{id}) ────────────────────────────────────
+
+
+class DrawingDetail(BaseModel):
+    """Combined image + extraction response for a single drawing."""
+
+    drawing_id: str
+    preview_url: str = Field(..., description="URL to the 300-DPI PNG preview image.")
+    extraction: ExtractionResult | None = Field(
+        None,
+        description="Latest extraction result, or None if extraction hasn't run yet.",
+    )
+    verified: bool = Field(
+        False,
+        description="True if a human has reviewed and confirmed the extraction.",
+    )
+
+
+# ── Review models (PUT /api/drawings/{id}/review) ─────────────────────────────
+
+
+class ReviewRequest(BaseModel):
+    """Body for submitting a corrected extraction."""
+
+    data: ExtractedDrawingData = Field(
+        ..., description="The (human-corrected) extraction data to store and index."
+    )
+
+
+class ReviewResponse(BaseModel):
+    """Confirmation that the review was accepted and indexed."""
+
+    drawing_id: str
+    verified: bool
+    indexed: bool
+    message: str
+
+
+# ── Demo seed models (GET /api/demo/seed) ─────────────────────────────────────
+
+
+class SeededExample(BaseModel):
+    """Metadata about one seeded demo example."""
+
+    drawing_id: str
+    label: str
+    description: str
+    tags: list[str] = Field(default_factory=list)
+    preview_url: str
+    extraction_url: str
+
+
+class SeedResult(BaseModel):
+    """Response from GET /api/demo/seed."""
+
+    seeded_count: int
+    examples: list[SeededExample]
+    message: str

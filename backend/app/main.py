@@ -2,12 +2,15 @@
 Blueprint AI — FastAPI application entry point.
 
 Routes registered here:
-  GET  /health                           → health check
-  POST /api/upload                       → ingest PDF/image, return drawing_id
-  GET  /api/drawing/{id}/preview         → serve 300-DPI PNG render
-  GET  /api/drawing/{id}/meta            → return DrawingMeta JSON
-  POST /api/extract/{drawing_id}         → run VLM extraction, return ExtractionResult
-  GET  /api/extract/{drawing_id}/result  → retrieve stored ExtractionResult
+  GET  /health                             → health check
+  POST /api/upload                         → ingest PDF/image, return drawing_id
+  GET  /api/drawing/{id}/preview           → serve 300-DPI PNG render
+  GET  /api/drawing/{id}/meta              → return DrawingMeta JSON
+  POST /api/extract/{drawing_id}           → run VLM extraction, return ExtractionResult
+  GET  /api/extract/{drawing_id}/result    → retrieve stored ExtractionResult
+  GET  /api/drawings/{drawing_id}          → image URL + extracted JSON
+  PUT  /api/drawings/{drawing_id}/review   → submit corrected JSON + trigger FAISS index
+  GET  /api/demo/seed                      → load seeded examples, reset + rebuild FAISS
 """
 
 from __future__ import annotations
@@ -17,6 +20,8 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routers import demo as demo_router
+from app.routers import drawings as drawings_router
 from app.routers import extract as extract_router
 from app.routers import upload as upload_router
 
@@ -50,6 +55,8 @@ app.add_middleware(
 
 app.include_router(upload_router.router, prefix="/api")
 app.include_router(extract_router.router, prefix="/api")
+app.include_router(drawings_router.router, prefix="/api")
+app.include_router(demo_router.router, prefix="/api")
 
 
 # ── Health check ───────────────────────────────────────────────────────────────
