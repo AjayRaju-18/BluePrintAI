@@ -1,0 +1,2 @@
+# This file ensures the storage/ directory is tracked by git.
+# Uploaded drawing artefacts are written here at runtime and are gitignored.

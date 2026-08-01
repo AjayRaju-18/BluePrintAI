@@ -97,3 +97,9 @@ Thumbs.db
 # ─────────────────────────────────────────
 *.log
 logs/
+
+# ─────────────────────────────────────────
+# Runtime upload storage
+# ─────────────────────────────────────────
+backend/storage/*
+!backend/storage/.gitkeep

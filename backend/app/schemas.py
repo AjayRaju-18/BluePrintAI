@@ -6,7 +6,7 @@ All bbox fields are [x, y, w, h] normalized to [0, 1] relative to image size.
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
@@ -72,3 +72,52 @@ class ExtractedDrawingData(BaseModel):
     gdt_callouts: list[GDTCallout] = Field(default_factory=list)
     surface_finish: list[SurfaceFinish] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
+
+
+# ── Upload / storage models ────────────────────────────────────────────────────
+
+
+class DrawingMeta(BaseModel):
+    """
+    Metadata written to storage/<drawing_id>/meta.json after upload.
+    Also returned as part of UploadResponse.
+    """
+
+    drawing_id: str = Field(..., description="Unique hex ID for this drawing.")
+    original_filename: str = Field(..., description="Original uploaded filename.")
+    content_type: str = Field(..., description="MIME type of the upload.")
+    pdf_type: Literal["vector", "raster"] | None = Field(
+        None,
+        description=(
+            "'vector' if the PDF has a selectable text layer, "
+            "'raster' if scanned/image-only, "
+            "None for direct image uploads."
+        ),
+    )
+    has_text_layer: bool = Field(
+        False,
+        description="True when a text_layer.txt was extracted from a vector PDF.",
+    )
+    page_count: int | None = Field(None, description="Total pages (PDFs only).")
+    render_png: str = Field(
+        ..., description="Filename of the 300-DPI PNG render inside the storage dir."
+    )
+    text_layer_file: str | None = Field(
+        None, description="Filename of the extracted text layer, if any."
+    )
+    created_at: str = Field(..., description="ISO-8601 UTC timestamp of ingestion.")
+
+
+class UploadResponse(BaseModel):
+    """Response body for POST /api/upload."""
+
+    drawing_id: str = Field(..., description="ID to pass to subsequent API calls.")
+    original_filename: str
+    pdf_type: Literal["vector", "raster"] | None
+    has_text_layer: bool
+    page_count: int | None
+    render_url: str = Field(
+        ...,
+        description="URL to fetch the rendered PNG preview.",
+    )
+    created_at: str

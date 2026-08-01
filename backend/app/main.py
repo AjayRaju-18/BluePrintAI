@@ -2,8 +2,11 @@
 Blueprint AI — FastAPI application entry point.
 
 Routes registered here:
-  GET  /health          → health check
-  POST /api/extract     → (stub) drawing extraction  [see routers/extract.py]
+  GET  /health                           → health check
+  POST /api/upload                       → ingest PDF/image, return drawing_id
+  GET  /api/drawing/{id}/preview         → serve 300-DPI PNG render
+  GET  /api/drawing/{id}/meta            → return DrawingMeta JSON
+  POST /api/extract                      → (stub) drawing extraction
 """
 
 from __future__ import annotations
@@ -14,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import extract as extract_router
+from app.routers import upload as upload_router
 
 # ── App instance ───────────────────────────────────────────────────────────────
 
@@ -43,6 +47,7 @@ app.add_middleware(
 
 # ── Routers ────────────────────────────────────────────────────────────────────
 
+app.include_router(upload_router.router, prefix="/api")
 app.include_router(extract_router.router, prefix="/api")
 
 
