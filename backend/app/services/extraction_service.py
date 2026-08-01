@@ -8,11 +8,16 @@ Design goals (demo build):
 - Encode the PNG as a base64 data-URL so we never need a public image host.
 - Include the text layer in the user prompt when available (richer context).
 - Parse with Pydantic; surface a structured error if the model returns bad JSON.
+- Demo fallback: on ANY failure, check if the drawing matches a known demo
+  sample (by SHA-256 of page_01.png, then by original filename). If it does,
+  return the pre-computed extraction with source='demo_fallback' so the demo
+  degrades gracefully even on a flaky connection.
 """
 
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import re
@@ -33,6 +38,16 @@ HF_MODEL_ID: str = os.environ.get(
 )
 HF_API_BASE = "https://api-inference.huggingface.co/models"
 HF_TIMEOUT = 120.0  # seconds — VL models can be slow on cold start
+
+# ── Demo data paths ────────────────────────────────────────────────────────────
+
+_DEMO_DATA_DIR = Path(__file__).resolve().parents[2] / "demo_data"
+
+# Lazy-loaded: maps sha256 → demo_id and basename → demo_id
+_DEMO_HASHES: dict[str, str] = {}     # sha256 hex → demo_id, e.g. "bracket"
+_DEMO_FILENAMES: dict[str, str] = {}  # image basename → demo_id
+_demo_registry_loaded = False
+
 
 # ── System prompt ──────────────────────────────────────────────────────────────
 
@@ -92,6 +107,9 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
     Load artefacts for *drawing_id*, call the HF API, parse the response,
     and persist the result as ``extraction.json`` in the drawing storage dir.
 
+    On any failure (network, timeout, bad JSON, schema mismatch) tries a
+    demo fallback before returning an error result.
+
     Returns an :class:`ExtractionResult` (success or structured failure).
     """
     drawing_dir = STORAGE_ROOT / drawing_id
@@ -115,7 +133,7 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
             text_hint = (
                 "\n\nAdditional context — text extracted directly from the PDF vector layer "
                 "(use this to improve accuracy of part name, material, dimensions, etc.):\n"
-                f"```\n{raw_text[:4000]}\n```"  # cap at 4 k chars for token budget
+                f"```\n{raw_text[:4000]}\n```"
             )
 
     # ── Build messages ─────────────────────────────────────────────────────────
@@ -137,7 +155,7 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
             {"role": "user", "content": user_content},
         ],
         "max_tokens": 2048,
-        "temperature": 0.1,  # low temp → more deterministic JSON output
+        "temperature": 0.1,
     }
 
     # ── Call HF API ────────────────────────────────────────────────────────────
@@ -151,15 +169,20 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
         async with httpx.AsyncClient(timeout=HF_TIMEOUT) as client:
             resp = await client.post(url, json=payload, headers=headers)
     except httpx.TimeoutException:
-        return _error_result(drawing_id, "Request to Hugging Face API timed out (120 s).")
+        return _with_fallback(
+            drawing_id, drawing_dir,
+            "Request to Hugging Face API timed out (120 s).",
+        )
     except httpx.RequestError as exc:
-        return _error_result(drawing_id, f"Network error calling HF API: {exc}")
+        return _with_fallback(
+            drawing_id, drawing_dir,
+            f"Network error calling HF API: {exc}",
+        )
 
     if resp.status_code != 200:
-        snippet = resp.text[:300]
-        return _error_result(
-            drawing_id,
-            f"HF API returned HTTP {resp.status_code}: {snippet}",
+        return _with_fallback(
+            drawing_id, drawing_dir,
+            f"HF API returned HTTP {resp.status_code}: {resp.text[:300]}",
             raw_response=resp.text,
         )
 
@@ -167,8 +190,8 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
     try:
         choice = resp.json()["choices"][0]["message"]["content"]
     except (KeyError, IndexError, json.JSONDecodeError) as exc:
-        return _error_result(
-            drawing_id,
+        return _with_fallback(
+            drawing_id, drawing_dir,
             f"Unexpected response structure from HF API: {exc}",
             raw_response=resp.text,
         )
@@ -178,8 +201,8 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
     try:
         raw_dict = json.loads(json_str)
     except json.JSONDecodeError as exc:
-        return _error_result(
-            drawing_id,
+        return _with_fallback(
+            drawing_id, drawing_dir,
             f"Model output is not valid JSON: {exc}",
             raw_response=choice,
         )
@@ -188,23 +211,120 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
     try:
         data = ExtractedDrawingData.model_validate(raw_dict)
     except ValidationError as exc:
-        return _error_result(
-            drawing_id,
+        return _with_fallback(
+            drawing_id, drawing_dir,
             f"Model JSON does not match schema: {exc.error_count()} error(s). "
             f"First: {exc.errors()[0]['msg']}",
             raw_response=choice,
         )
 
-    # ── Persist result ─────────────────────────────────────────────────────────
+    # ── Persist and return ─────────────────────────────────────────────────────
     result = ExtractionResult(
         drawing_id=drawing_id,
         status="ok",
         data=data,
-        raw_response=None,  # don't persist the full base64-heavy response
+        source="hf_api",
+        raw_response=None,
         extracted_at=_utcnow(),
     )
     _persist(drawing_dir, result)
     return result
+
+
+# ── Demo fallback ──────────────────────────────────────────────────────────────
+
+
+def _load_demo_registry() -> None:
+    """
+    Lazily build two lookup dicts from demo_data/manifest.json:
+      _DEMO_HASHES    : sha256(demo PNG) → demo_id
+      _DEMO_FILENAMES : image basename   → demo_id
+    Called once on the first extraction attempt.
+    """
+    global _demo_registry_loaded, _DEMO_HASHES, _DEMO_FILENAMES
+    if _demo_registry_loaded:
+        return
+
+    manifest_path = _DEMO_DATA_DIR / "manifest.json"
+    if not manifest_path.is_file():
+        _demo_registry_loaded = True
+        return
+
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for ex in manifest.get("examples", []):
+        demo_id = ex["id"]
+        img_path = _DEMO_DATA_DIR / ex["image"]
+        if img_path.is_file():
+            sha = hashlib.sha256(img_path.read_bytes()).hexdigest()
+            _DEMO_HASHES[sha] = demo_id
+        _DEMO_FILENAMES[ex["image"]] = demo_id
+
+    _demo_registry_loaded = True
+
+
+def _find_demo_match(drawing_dir: Path) -> str | None:
+    """
+    Return the demo_id if the drawing's PNG matches a known demo sample,
+    or None if no match is found.
+
+    Checks in order:
+      1. SHA-256 of page_01.png  (content match — survives renames)
+      2. original_filename from meta.json  (fast pre-filter)
+    """
+    _load_demo_registry()
+
+    # 1 — Hash match
+    png_path = drawing_dir / "page_01.png"
+    if png_path.is_file():
+        sha = hashlib.sha256(png_path.read_bytes()).hexdigest()
+        if sha in _DEMO_HASHES:
+            return _DEMO_HASHES[sha]
+
+    # 2 — Filename match (basename only)
+    meta_path = drawing_dir / "meta.json"
+    if meta_path.is_file():
+        try:
+            meta = DrawingMeta.model_validate_json(meta_path.read_text(encoding="utf-8"))
+            basename = Path(meta.original_filename).name
+            if basename in _DEMO_FILENAMES:
+                return _DEMO_FILENAMES[basename]
+        except Exception:
+            pass
+
+    return None
+
+
+def _with_fallback(
+    drawing_id: str,
+    drawing_dir: Path,
+    error_message: str,
+    raw_response: str | None = None,
+) -> ExtractionResult:
+    """
+    Try to return a demo fallback result.
+    If no fallback is available, return a plain error result.
+    """
+    demo_id = _find_demo_match(drawing_dir)
+    if demo_id:
+        json_path = _DEMO_DATA_DIR / f"drawing_{demo_id}.json"
+        if json_path.is_file():
+            try:
+                raw_dict = json.loads(json_path.read_text(encoding="utf-8"))
+                data = ExtractedDrawingData.model_validate(raw_dict)
+                result = ExtractionResult(
+                    drawing_id=drawing_id,
+                    status="ok",
+                    data=data,
+                    source="demo_fallback",
+                    raw_response=None,
+                    extracted_at=_utcnow(),
+                )
+                _persist(drawing_dir, result)
+                return result
+            except Exception:
+                pass  # fallback itself failed — fall through to error
+
+    return _error_result(drawing_id, error_message, raw_response)
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -213,11 +333,9 @@ async def run_extraction(drawing_id: str) -> ExtractionResult:
 def _strip_fences(text: str) -> str:
     """Remove markdown code fences if the model wrapped its output anyway."""
     text = text.strip()
-    # Match ```json ... ``` or ``` ... ```
     match = re.search(r"```(?:json)?\s*([\s\S]+?)\s*```", text)
     if match:
         return match.group(1).strip()
-    # If model prepended prose before the JSON, grab from first {
     brace = text.find("{")
     if brace > 0:
         text = text[brace:]
@@ -234,6 +352,7 @@ def _error_result(
         status="error",
         error_message=message,
         data=None,
+        source="hf_api",
         raw_response=raw_response,
         extracted_at=_utcnow(),
     )

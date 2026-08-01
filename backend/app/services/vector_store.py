@@ -60,6 +60,7 @@ class SearchHit(NamedTuple):
     drawing_id: str
     label: str
     distance: float      # L2 distance — lower = more similar
+    score: float         # similarity score in [0, 1] — higher = more similar
     preview_url: str
 
 
@@ -125,11 +126,13 @@ async def search(
         if idx < 0:
             continue
         entry = _id_map[idx]
+        d = float(dist)
         hits.append(
             SearchHit(
                 drawing_id=entry["drawing_id"],
                 label=entry["label"],
-                distance=float(dist),
+                distance=d,
+                score=round(1.0 / (1.0 + d), 4),
                 preview_url=f"/api/drawing/{entry['drawing_id']}/preview",
             )
         )
@@ -154,6 +157,46 @@ def size() -> int:
     if _index is None:
         _ensure_loaded()
     return _index.ntotal if _index else 0
+
+
+async def search_by_text(
+    query: str,
+    top_k: int = 5,
+) -> list[SearchHit]:
+    """
+    Embed a raw text *query* and return the top-k most similar drawings.
+
+    - Returns an empty list when the index is empty (never raises).
+    - Results are ordered by ascending L2 distance (most similar first).
+    - Each hit includes both ``distance`` and ``score`` (= 1/(1+distance)).
+    """
+    async with _lock:
+        _ensure_loaded()
+        if _index.ntotal == 0:
+            return []
+
+    vec = await asyncio.to_thread(_embed, query)
+
+    async with _lock:
+        k = min(top_k, _index.ntotal)
+        distances, indices = _index.search(vec.reshape(1, -1), k)
+
+    hits: list[SearchHit] = []
+    for dist, idx in zip(distances[0], indices[0]):
+        if idx < 0:
+            continue
+        entry = _id_map[idx]
+        d = float(dist)
+        hits.append(
+            SearchHit(
+                drawing_id=entry["drawing_id"],
+                label=entry["label"],
+                distance=d,
+                score=round(1.0 / (1.0 + d), 4),
+                preview_url=f"/api/drawing/{entry['drawing_id']}/preview",
+            )
+        )
+    return hits
 
 
 # ══════════════════════════════════════════════════════════════════════════════

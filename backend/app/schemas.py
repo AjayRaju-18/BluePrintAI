@@ -105,6 +105,10 @@ class DrawingMeta(BaseModel):
     text_layer_file: str | None = Field(
         None, description="Filename of the extracted text layer, if any."
     )
+    png_sha256: str | None = Field(
+        None,
+        description="SHA-256 hex digest of page_01.png — used for demo fallback matching.",
+    )
     created_at: str = Field(..., description="ISO-8601 UTC timestamp of ingestion.")
 
 
@@ -140,6 +144,14 @@ class ExtractionResult(BaseModel):
     error_message: str | None = Field(
         None,
         description="Human-readable failure reason (only when status='error').",
+    )
+    source: Literal["hf_api", "demo_fallback"] | None = Field(
+        None,
+        description=(
+            "'hf_api' when the result came from a live model call, "
+            "'demo_fallback' when the HF API failed and a matching demo "
+            "example was returned instead."
+        ),
     )
     raw_response: str | None = Field(
         None,
@@ -206,3 +218,28 @@ class SeedResult(BaseModel):
     seeded_count: int
     examples: list[SeededExample]
     message: str
+
+
+# ── Search models (GET /api/search) ───────────────────────────────────────────
+
+
+class SearchResult(BaseModel):
+    """One hit returned by the search endpoint."""
+
+    drawing_id: str
+    part_name: str = Field(..., description="Label / part name of the matched drawing.")
+    score: float = Field(
+        ...,
+        description="Similarity score in (0, 1] — higher means more similar. "
+        "Computed as 1 / (1 + L2_distance).",
+    )
+    distance: float = Field(..., description="Raw L2 distance — lower means more similar.")
+    preview_url: str
+
+
+class SearchResponse(BaseModel):
+    """Response from GET /api/search."""
+
+    query: str
+    results: list[SearchResult]
+    index_size: int = Field(..., description="Total number of drawings currently indexed.")

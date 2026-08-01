@@ -6,14 +6,15 @@ Responsibilities:
 - Detect PDF type: vector (has selectable text) vs raster (scanned)
 - Render page 1 to a 300-DPI PNG using PyMuPDF
 - Extract the text layer from vector PDFs
+- Compute SHA-256 of the rendered PNG (for demo fallback matching)
 - Persist everything under /backend/storage/<drawing_id>/
 - Return a DrawingMeta describing what was stored
 """
 
 from __future__ import annotations
 
+import hashlib
 import io
-import json
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -101,13 +102,14 @@ def _process_pdf(
     # ── Extract text layer (vector PDFs only) ─────────────────────────────────
     text_path: Path | None = None
     if pdf_type == "vector":
-        # Richer extraction: words with bounding boxes for future use
-        words = page.get_text("words")  # list of (x0,y0,x1,y1,word,block,line,word_idx)
+        words = page.get_text("words")
         text_content = "\n".join(w[4] for w in words)
         text_path = dest_dir / "text_layer.txt"
         text_path.write_text(text_content, encoding="utf-8")
 
     doc.close()
+
+    png_sha256 = _sha256(png_path)
 
     return DrawingMeta(
         drawing_id=drawing_id,
@@ -118,6 +120,7 @@ def _process_pdf(
         page_count=page_count,
         render_png="page_01.png",
         text_layer_file="text_layer.txt" if text_path else None,
+        png_sha256=png_sha256,
         created_at=_utcnow(),
     )
 
@@ -141,6 +144,8 @@ def _process_image(
     suffix = Path(filename).suffix or ".bin"
     (dest_dir / f"original{suffix}").write_bytes(img_bytes)
 
+    png_sha256 = _sha256(png_path)
+
     return DrawingMeta(
         drawing_id=drawing_id,
         original_filename=filename,
@@ -150,11 +155,19 @@ def _process_image(
         page_count=None,
         render_png="page_01.png",
         text_layer_file=None,
+        png_sha256=png_sha256,
         created_at=_utcnow(),
     )
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
+
+
+def _sha256(path: Path) -> str:
+    """Compute hex-encoded SHA-256 of a file."""
+    h = hashlib.sha256()
+    h.update(path.read_bytes())
+    return h.hexdigest()
 
 
 def _new_id() -> str:

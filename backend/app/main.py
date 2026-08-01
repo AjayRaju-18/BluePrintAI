@@ -11,6 +11,7 @@ Routes registered here:
   GET  /api/drawings/{drawing_id}          → image URL + extracted JSON
   PUT  /api/drawings/{drawing_id}/review   → submit corrected JSON + trigger FAISS index
   GET  /api/demo/seed                      → load seeded examples, reset + rebuild FAISS
+  GET  /api/search?q={query}               → semantic search across indexed drawings
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import demo as demo_router
 from app.routers import drawings as drawings_router
 from app.routers import extract as extract_router
+from app.routers import search as search_router
 from app.routers import upload as upload_router
 
 # ── App instance ───────────────────────────────────────────────────────────────
@@ -57,6 +59,7 @@ app.include_router(upload_router.router, prefix="/api")
 app.include_router(extract_router.router, prefix="/api")
 app.include_router(drawings_router.router, prefix="/api")
 app.include_router(demo_router.router, prefix="/api")
+app.include_router(search_router.router, prefix="/api")
 
 
 # ── Health check ───────────────────────────────────────────────────────────────
