@@ -19,7 +19,7 @@ from app.schemas import (
     ReviewResponse,
 )
 from app.services.drawing_service import STORAGE_ROOT
-from app.services.search_service import index_drawing
+from app.services import vector_store
 
 router = APIRouter(prefix="/drawings", tags=["drawings"])
 
@@ -98,7 +98,7 @@ async def review_drawing(
 
     # Index into FAISS
     label = body.data.part_name or drawing_id
-    await index_drawing(drawing_id, label, body.data)
+    await vector_store.add(drawing_id, label, body.data)
 
     return ReviewResponse(
         drawing_id=drawing_id,

@@ -27,7 +27,7 @@ from app.schemas import (
     SeededExample,
 )
 from app.services.drawing_service import STORAGE_ROOT
-from app.services.search_service import index_drawing, reset_index
+from app.services import vector_store
 
 router = APIRouter(prefix="/demo", tags=["demo"])
 
@@ -69,7 +69,7 @@ async def seed_demo() -> SeedResult:
 
     # ── Wipe previous seed state ───────────────────────────────────────────────
     await _wipe_previous_seeds()
-    await reset_index()
+    await vector_store.reset()
 
     # ── Seed each example ──────────────────────────────────────────────────────
     seeded: list[SeededExample] = []
@@ -134,7 +134,7 @@ async def seed_demo() -> SeedResult:
         (drawing_dir / "verified.flag").write_text(now, encoding="utf-8")
 
         # Index into FAISS
-        await index_drawing(drawing_id, ex["label"], extraction_data)
+        await vector_store.add(drawing_id, ex["label"], extraction_data)
 
         seeded.append(
             SeededExample(
