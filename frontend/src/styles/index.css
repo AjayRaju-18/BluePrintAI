@@ -1,0 +1,14 @@
+/*
+ * styles/index.css — Blueprint AI Design System barrel
+ *
+ * Import order matters:
+ *   1. tokens   — custom properties only, no cascade side-effects
+ *   2. layout   — base reset, body, structural primitives
+ *   3. components — reusable BEM component classes
+ *   4. animations — keyframes and animation utilities
+ */
+
+@import './tokens.css';
+@import './layout.css';
+@import './components.css';
+@import './animations.css';

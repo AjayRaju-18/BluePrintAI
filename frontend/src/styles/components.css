@@ -1,0 +1,441 @@
+/*
+ * components.css — Blueprint AI Design System
+ * Five reusable component classes.
+ * Reads exclusively from tokens.css — no hardcoded values.
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   1. GLASS PANEL
+   Large rounded container that floats on the gradient background.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.glass-panel {
+  background:          var(--color-glass);
+  backdrop-filter:     blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-radius:       var(--radius-lg);
+  border:              1px solid var(--color-glass-border);
+  box-shadow:          var(--shadow-glass);
+  overflow:            hidden; /* keeps children within rounded corners */
+}
+
+/* Elevated variant — stronger shadow for modals / popovers */
+.glass-panel--elevated {
+  box-shadow: var(--shadow-elevate);
+}
+
+/* Flat variant — no shadow (for nested panels) */
+.glass-panel--flat {
+  box-shadow: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   2. ICON RAIL  (vertical nav on desktop → bottom tab bar on mobile)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.icon-rail {
+  position:       fixed;
+  top:            0;
+  left:           0;
+  z-index:        var(--z-nav);
+  height:         100vh;
+  width:          72px;
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  padding:        var(--sp-6) 0;
+  gap:            var(--sp-3);
+  background:     var(--color-ink);
+}
+
+/* Logo / brand mark slot at top of rail */
+.icon-rail__brand {
+  width:          40px;
+  height:         40px;
+  border-radius:  var(--radius-sm);
+  background:     var(--color-amber);
+  display:        grid;
+  place-items:    center;
+  margin-bottom:  var(--sp-4);
+  flex-shrink:    0;
+}
+
+/* Individual nav item wrapper */
+.icon-rail__item {
+  display:         flex;
+  flex-direction:  column;
+  align-items:     center;
+  gap:             var(--sp-1);
+  cursor:          pointer;
+  text-decoration: none;
+  color:           rgba(255, 255, 255, 0.50);
+  transition:      color var(--duration-fast) var(--ease-out);
+  padding:         var(--sp-2);
+  border-radius:   var(--radius-md);
+  width:           100%;
+}
+
+.icon-rail__item:hover {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.icon-rail__item.active,
+.icon-rail__item[aria-current="page"] {
+  color:      var(--color-amber);
+  background: rgba(240, 162, 2, 0.12);
+}
+
+/* Icon button circle */
+.icon-rail__icon {
+  width:          40px;
+  height:         40px;
+  border-radius:  var(--radius-circle);
+  display:        grid;
+  place-items:    center;
+  font-size:      1.1rem;
+  flex-shrink:    0;
+}
+
+/* Text label under icon (hidden on tablet, gone on mobile) */
+.icon-rail__label {
+  font-family: var(--font-body);
+  font-size:   0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ── Tablet: rail stays, labels disappear ──── */
+@media (max-width: 1023px) {
+  .icon-rail {
+    width: 60px;
+    padding: var(--sp-4) 0;
+  }
+  .icon-rail__label {
+    display: none;
+  }
+}
+
+/* ── Mobile: collapses to a fixed bottom tab bar ──── */
+@media (max-width: 639px) {
+  .icon-rail {
+    top:            auto;
+    bottom:         0;
+    left:           0;
+    right:          0;
+    height:         60px;
+    width:          100%;
+    flex-direction: row;
+    justify-content: space-around;
+    padding:        0 var(--sp-2);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    border-top:     1px solid rgba(255, 255, 255, 0.08);
+  }
+  .icon-rail__brand {
+    display: none; /* hide brand mark in tab bar */
+  }
+  .icon-rail__item {
+    flex: 1;
+    padding: var(--sp-2) 0;
+    gap: var(--sp-1);
+  }
+  .icon-rail__label {
+    display: block; /* show labels in tab bar */
+    font-size: 0.5625rem;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   3. PILL BUTTON  (primary action + quick-action chips)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.btn-pill {
+  display:         inline-flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             var(--sp-2);
+  padding:         var(--sp-3) var(--sp-6);
+  border-radius:   var(--radius-pill);
+  border:          none;
+  background:      var(--color-ink);
+  color:           var(--color-white);
+  font-family:     var(--font-body);
+  font-size:       0.875rem;
+  font-weight:     600;
+  line-height:     1;
+  cursor:          pointer;
+  text-decoration: none;
+  white-space:     nowrap;
+  transition:
+    background    var(--duration-fast) var(--ease-out),
+    box-shadow    var(--duration-fast) var(--ease-out),
+    transform     var(--duration-fast) var(--ease-out),
+    opacity       var(--duration-fast);
+}
+
+.btn-pill:hover {
+  background: #1a3557; /* ink + 10% lighter */
+  box-shadow: var(--shadow-icon-btn);
+  transform: translateY(-1px);
+}
+
+.btn-pill:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Amber variant — primary CTA */
+.btn-pill--amber {
+  background: var(--color-amber);
+  color:      var(--color-ink);
+}
+
+.btn-pill--amber:hover {
+  background: var(--color-amber-hover);
+  box-shadow: var(--shadow-amber);
+}
+
+/* Ghost variant — outline only */
+.btn-pill--ghost {
+  background: transparent;
+  color:      var(--color-ink);
+  border:     1.5px solid rgba(16, 35, 61, 0.20);
+  box-shadow: none;
+}
+
+.btn-pill--ghost:hover {
+  background: var(--color-surface-hover);
+  border-color: rgba(16, 35, 61, 0.40);
+  box-shadow: none;
+}
+
+/* Cyan variant — secondary accent */
+.btn-pill--cyan {
+  background: var(--color-cyan);
+  color:      var(--color-ink);
+}
+
+/* Small / chip size */
+.btn-pill--sm {
+  padding:   var(--sp-2) var(--sp-4);
+  font-size: 0.75rem;
+}
+
+/* Disabled state */
+.btn-pill:disabled,
+.btn-pill[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor:  not-allowed;
+  pointer-events: none;
+}
+
+/* Loading state — swaps content for a spinner */
+.btn-pill.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+.btn-pill.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.30);
+  border-top-color: white;
+  border-radius: var(--radius-circle);
+  animation: spin 0.7s linear infinite;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   4. FEATURE CARD  (icon + heading + subtitle, used in groups of 3)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.feature-card {
+  background:    var(--color-white);
+  border-radius: var(--radius-md);
+  border:        1px solid rgba(16, 35, 61, 0.07);
+  box-shadow:    var(--shadow-card);
+  padding:       var(--sp-6);
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--sp-3);
+  transition:
+    box-shadow  var(--duration-base) var(--ease-out),
+    transform   var(--duration-base) var(--ease-out);
+}
+
+.feature-card:hover {
+  box-shadow: var(--shadow-elevate);
+  transform:  translateY(-2px);
+}
+
+/* Icon container — tinted cyan pill */
+.feature-card__icon {
+  width:          40px;
+  height:         40px;
+  border-radius:  var(--radius-sm);
+  background:     var(--color-cyan-muted);
+  display:        grid;
+  place-items:    center;
+  font-size:      1.1rem;
+  flex-shrink:    0;
+  color:          var(--color-cyan);
+}
+
+/* Amber icon tint variant */
+.feature-card__icon--amber {
+  background: var(--color-amber-glow);
+  color:      var(--color-amber);
+}
+
+/* Ink icon tint variant */
+.feature-card__icon--ink {
+  background: rgba(16, 35, 61, 0.08);
+  color:      var(--color-ink);
+}
+
+.feature-card__heading {
+  font-family: var(--font-display);
+  font-size:   1rem;
+  font-weight: 600;
+  color:       var(--color-ink);
+  line-height: 1.3;
+}
+
+.feature-card__subtitle {
+  font-family:  var(--font-body);
+  font-size:    0.8125rem;
+  color:        var(--color-ink-muted);
+  line-height:  1.55;
+  margin-top:   auto; /* pushes subtitle to bottom when cards share height */
+}
+
+/* Responsive 3→2→1 grid  (defined in layout.css as .feature-grid) */
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   5. COMMAND BAR  (search / chat input area with chips)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.command-bar {
+  display:       flex;
+  flex-direction: column;
+  gap:           var(--sp-3);
+  width:         100%;
+}
+
+/* Input row */
+.command-bar__row {
+  display:       flex;
+  align-items:   center;
+  gap:           var(--sp-3);
+  padding:       var(--sp-3) var(--sp-4);
+  background:    var(--color-white);
+  border-radius: var(--radius-pill);
+  border:        1.5px solid rgba(16, 35, 61, 0.12);
+  box-shadow:    var(--shadow-card);
+  transition:
+    border-color var(--duration-fast),
+    box-shadow   var(--duration-fast);
+}
+
+.command-bar__row:focus-within {
+  border-color: var(--color-amber);
+  box-shadow:   0 0 0 3px var(--color-amber-glow), var(--shadow-card);
+}
+
+/* Leading icon slot */
+.command-bar__lead {
+  font-size:   1rem;
+  color:       var(--color-ink-muted);
+  flex-shrink: 0;
+  display:     grid;
+  place-items: center;
+}
+
+/* Text input */
+.command-bar__input {
+  flex:        1;
+  border:      none;
+  background:  transparent;
+  font-family: var(--font-body);
+  font-size:   0.9375rem;
+  color:       var(--color-ink);
+  outline:     none;
+  min-width:   0; /* prevent flex overflow */
+}
+
+.command-bar__input::placeholder {
+  color: var(--color-ink-subtle);
+}
+
+/* Trailing icon buttons (mic, send) */
+.command-bar__icon-btn {
+  width:         32px;
+  height:        32px;
+  border-radius: var(--radius-circle);
+  border:        none;
+  background:    transparent;
+  color:         var(--color-ink-muted);
+  display:       grid;
+  place-items:   center;
+  cursor:        pointer;
+  flex-shrink:   0;
+  font-size:     0.95rem;
+  transition:
+    background var(--duration-fast),
+    color      var(--duration-fast);
+}
+
+.command-bar__icon-btn:hover {
+  background: var(--color-surface-hover);
+  color:      var(--color-ink);
+}
+
+/* Active send button — amber tinted */
+.command-bar__icon-btn--send {
+  background: var(--color-ink);
+  color:      var(--color-white);
+}
+
+.command-bar__icon-btn--send:hover {
+  background: var(--color-amber);
+  color:      var(--color-ink);
+}
+
+/* Quick-action chip row */
+.command-bar__chips {
+  display:     flex;
+  gap:         var(--sp-2);
+  flex-wrap:   wrap;
+  padding:     0 var(--sp-2);
+}
+
+/* Mobile sticky variant */
+.command-bar--sticky {
+  position:      fixed;
+  bottom:        0;
+  left:          0;
+  right:         0;
+  z-index:       var(--z-overlay);
+  padding:       var(--sp-3) var(--sp-4);
+  padding-bottom: calc(var(--sp-3) + env(safe-area-inset-bottom, 0px));
+  background:    rgba(253, 246, 236, 0.85); /* --color-bg-end tinted */
+  backdrop-filter:     blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+  border-top:    1px solid rgba(16, 35, 61, 0.08);
+}
+
+/* On mobile, keep it above the bottom nav rail */
+@media (max-width: 639px) {
+  .command-bar--sticky {
+    bottom: 60px; /* height of bottom tab bar */
+  }
+}

@@ -1,0 +1,105 @@
+/*
+ * animations.css — Blueprint AI Design System
+ * Keyframes and animation utility classes.
+ */
+
+/* ── Keyframes ─────────────────────────────────────────────────────────────── */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+@keyframes pulse-amber {
+  0%, 100% { box-shadow: 0 0 0   0   var(--color-amber-glow); }
+  50%       { box-shadow: 0 0 20px 4px var(--color-amber-glow); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Animation utility classes ─────────────────────────────────────────────── */
+
+.anim-fade-up {
+  animation: fade-up var(--duration-slow) var(--ease-out) both;
+}
+
+.anim-scale-in {
+  animation: scale-in var(--duration-base) var(--ease-out) both;
+}
+
+.anim-fade-in {
+  animation: fade-in var(--duration-base) var(--ease-out) both;
+}
+
+/* Stagger helpers — apply to parent, children pick up delay via nth-child */
+.anim-stagger > * {
+  animation: fade-up var(--duration-slow) var(--ease-out) both;
+}
+.anim-stagger > *:nth-child(1) { animation-delay:  0ms; }
+.anim-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.anim-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.anim-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.anim-stagger > *:nth-child(5) { animation-delay: 240ms; }
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(16, 35, 61, 0.06) 25%,
+    rgba(16, 35, 61, 0.12) 50%,
+    rgba(16, 35, 61, 0.06) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+/* Spinner */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(16, 35, 61, 0.15);
+  border-top-color: var(--color-ink);
+  border-radius: var(--radius-circle);
+  animation: spin 0.7s linear infinite;
+}
+
+.spinner--amber {
+  border-color: var(--color-amber-glow);
+  border-top-color: var(--color-amber);
+}
+
+/* Status dot (live / processing indicators) */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-circle);
+  background: var(--color-amber);
+  animation: blink-dot 2s ease-in-out infinite;
+}
+
+.status-dot--success { background: var(--color-success); animation: none; }
+.status-dot--danger  { background: var(--color-danger);  animation: none; }

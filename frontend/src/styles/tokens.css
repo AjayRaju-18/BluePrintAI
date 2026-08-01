@@ -1,0 +1,94 @@
+/*
+ * tokens.css — Blueprint AI Design System
+ * Single source of truth for all design decisions.
+ * Import this first; every other stylesheet reads from these variables.
+ */
+
+:root {
+  /* ── Palette ─────────────────────────────────────────────────────────────── */
+
+  /* Background gradient */
+  --color-bg-start:       #EDF1FF;   /* soft periwinkle */
+  --color-bg-end:         #FBEFE0;   /* warm cream glow */
+
+  /* Glass surface */
+  --color-glass:          rgba(255, 255, 255, 0.60);
+  --color-glass-border:   rgba(255, 255, 255, 0.75);
+
+  /* Ink (text / brand) */
+  --color-ink:            #10233D;
+  --color-ink-muted:      rgba(16, 35, 61, 0.55);
+  --color-ink-subtle:     rgba(16, 35, 61, 0.35);
+
+  /* Primary CTA — amber */
+  --color-amber:          #F0A202;
+  --color-amber-hover:    #D48D00;
+  --color-amber-glow:     rgba(240, 162, 2, 0.28);
+
+  /* Secondary / mascot — cyan */
+  --color-cyan:           #5EC8D8;
+  --color-cyan-muted:     rgba(94, 200, 216, 0.15);
+
+  /* Utility */
+  --color-white:          #FFFFFF;
+  --color-surface-hover:  rgba(16, 35, 61, 0.05);
+  --color-danger:         #E5404A;
+  --color-success:        #2BAE7E;
+
+  /* ── Typography ──────────────────────────────────────────────────────────── */
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body:    'Inter', system-ui, sans-serif;
+
+  /* ── Spacing (8-pt grid) ─────────────────────────────────────────────────── */
+
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-8:  32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ── Border radius ───────────────────────────────────────────────────────── */
+
+  --radius-sm:     8px;
+  --radius-md:     12px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+  --radius-circle: 50%;
+
+  /* ── Blur ────────────────────────────────────────────────────────────────── */
+
+  --blur-glass: 20px;
+  --blur-sm:    8px;
+
+  /* ── Shadows ─────────────────────────────────────────────────────────────── */
+
+  --shadow-glass:    0 8px 40px rgba(16, 35, 61, 0.10),
+                     inset 0 1px 0 var(--color-glass-border);
+  --shadow-card:     0 2px 12px rgba(16, 35, 61, 0.08);
+  --shadow-amber:    0 4px 20px var(--color-amber-glow);
+  --shadow-icon-btn: 0 2px 8px rgba(16, 35, 61, 0.20);
+  --shadow-elevate:  0 16px 48px rgba(16, 35, 61, 0.14);
+
+  /* ── Motion ──────────────────────────────────────────────────────────────── */
+
+  --ease-out:      cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 380ms;
+
+  /* ── Z-index scale ───────────────────────────────────────────────────────── */
+
+  --z-base:    0;
+  --z-raised:  10;
+  --z-overlay: 100;
+  --z-nav:     200;
+  --z-modal:   300;
+  --z-toast:   400;
+}
