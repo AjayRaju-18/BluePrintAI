@@ -243,6 +243,7 @@ def _upsert(drawing_id: str, label: str, vec: np.ndarray) -> None:
     effectively instantaneous.
     """
     import faiss
+    global _id_map  # must be declared before first use of _id_map
 
     survivors = [e for e in _id_map if e["drawing_id"] != drawing_id]
 
@@ -267,7 +268,6 @@ def _upsert(drawing_id: str, label: str, vec: np.ndarray) -> None:
     _index.add(vec.reshape(1, -1))
     survivors.append({"vector_idx": new_idx, "drawing_id": drawing_id, "label": label})
 
-    global _id_map
     _id_map = survivors
 
 
