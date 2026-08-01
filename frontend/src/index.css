@@ -1,16 +1,16 @@
 /*
  * src/index.css — Blueprint AI entry point
  *
- * Clean break from the old dark theme.
- * All styles now live in src/styles/ and are imported via the barrel below.
+ * @import MUST come before any other rules (CSS spec).
+ * The design system barrel loads: tokens → layout → components → animations.
  */
 
-/* ── Box-sizing reset ─────────────────────────────────────────────────────── */
+/* ── 1. Import design system FIRST ───────────────────────────────────────── */
+@import './styles/index.css';
+
+/* ── 2. Box-sizing reset (after imports) ─────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin:     0;
   padding:    0;
 }
-
-/* ── Import the design system ─────────────────────────────────────────────── */
-@import './styles/index.css';

@@ -127,6 +127,7 @@
     left:           0;
     right:          0;
     height:         60px;
+    min-height:     60px;
     width:          100%;
     flex-direction: row;
     justify-content: space-around;
@@ -431,6 +432,13 @@
   backdrop-filter:     blur(var(--blur-glass));
   -webkit-backdrop-filter: blur(var(--blur-glass));
   border-top:    1px solid rgba(16, 35, 61, 0.08);
+}
+
+/* Drag-over highlight state */
+.command-bar--dragging .command-bar__row {
+  border-color: var(--color-cyan);
+  box-shadow:   0 0 0 3px var(--color-cyan-muted), var(--shadow-card);
+  background:   var(--color-cyan-muted);
 }
 
 /* On mobile, keep it above the bottom nav rail */

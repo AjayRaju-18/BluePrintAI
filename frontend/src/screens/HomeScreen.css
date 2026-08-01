@@ -63,7 +63,7 @@
 .home-panel {
   display:        flex;
   flex-direction: column;
-  min-height:     calc(100vh - var(--sp-8) * 2); /* full-height minus content padding */
+  min-height:     calc(100vh - 64px);
 }
 
 /* ── Hero section ─────────────────────────────────────────────────────────── */
@@ -135,9 +135,9 @@
 
 .mascot-bubble {
   position:      absolute;
-  top:           -68px;
+  top:           -72px;
   left:          50%;
-  transform:     translateX(-72%);
+  transform:     translateX(-65%);
   background:    var(--color-white);
   border:        1.5px solid rgba(16, 35, 61, 0.12);
   border-radius: 14px;
@@ -149,6 +149,7 @@
   box-shadow:    0 4px 20px rgba(16, 35, 61, 0.10);
   white-space:   nowrap;
   z-index:       var(--z-raised);
+  pointer-events: none;
   animation:     scale-in var(--duration-slow) var(--ease-out) 0.6s both;
 }
 
