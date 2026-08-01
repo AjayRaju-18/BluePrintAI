@@ -1,0 +1,346 @@
+/* ── HomeScreen.css — screen-specific styles ──────────────────────────────── */
+/* All design tokens come from src/styles/tokens.css (already globally loaded). */
+
+/* ── Top bar ──────────────────────────────────────────────────────────────── */
+
+.top-bar {
+  display:     flex;
+  align-items: center;
+  padding:     var(--sp-4) var(--sp-6);
+  gap:         var(--sp-4);
+  flex-shrink: 0;
+}
+
+.top-bar__brand {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-2);
+  flex:        0 0 auto;
+}
+
+.top-bar__logo {
+  font-size: 1.3rem;
+  color:     var(--color-amber);
+}
+
+.top-bar__name {
+  font-family: var(--font-display);
+  font-size:   1rem;
+  font-weight: 700;
+  color:       var(--color-ink);
+  white-space: nowrap;
+}
+
+.top-bar__version {
+  font-size:      0.6875rem;
+  font-weight:    600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color:          var(--color-ink-subtle);
+  padding:        2px 7px;
+  background:     var(--color-surface-hover);
+  border-radius:  var(--radius-pill);
+  flex-shrink:    0;
+}
+
+.top-bar__title {
+  flex:        1;
+  text-align:  center;
+  font-family: var(--font-display);
+  font-size:   1rem;
+  font-weight: 600;
+  color:       var(--color-ink-muted);
+}
+
+.top-bar__upgrade {
+  flex:      0 0 auto;
+  font-size: 0.8125rem;
+  padding:   var(--sp-2) var(--sp-5);
+}
+
+/* ── Home panel (glass container) ─────────────────────────────────────────── */
+
+.home-panel {
+  display:        flex;
+  flex-direction: column;
+  min-height:     calc(100vh - var(--sp-8) * 2); /* full-height minus content padding */
+}
+
+/* ── Hero section ─────────────────────────────────────────────────────────── */
+
+.home-hero {
+  display:     grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap:         var(--sp-8);
+  padding:     var(--sp-10) var(--sp-8) var(--sp-8);
+}
+
+.hero-content {
+  display:        flex;
+  flex-direction: column;
+  gap:            var(--sp-4);
+}
+
+.hero-headline {
+  font-family:    var(--font-display);
+  font-size:      clamp(2rem, 4vw, 2.75rem);
+  font-weight:    700;
+  line-height:    1.15;
+  letter-spacing: -0.025em;
+  color:          var(--color-ink);
+}
+
+.hero-subtext {
+  font-family: var(--font-body);
+  font-size:   1rem;
+  line-height: 1.6;
+  color:       var(--color-ink-muted);
+  max-width:   420px;
+}
+
+.hero-actions {
+  display: flex;
+  gap:     var(--sp-3);
+  margin-top: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+/* ── Mascot ───────────────────────────────────────────────────────────────── */
+
+.mascot-wrapper {
+  position:    relative;
+  display:     flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.mascot-svg {
+  width:     140px;
+  height:    auto;
+  animation: mascot-bob 2.8s ease-in-out infinite;
+}
+
+.mascot-eye-ring {
+  animation: mascot-eye-pulse 2s ease-in-out infinite;
+}
+
+.mascot-chest {
+  animation: mascot-chest-glow 3s ease-in-out infinite;
+}
+
+.mascot-grid-dot {
+  animation: mascot-grid-blink 3s ease-in-out infinite;
+}
+
+.mascot-bubble {
+  position:      absolute;
+  top:           -68px;
+  left:          50%;
+  transform:     translateX(-72%);
+  background:    var(--color-white);
+  border:        1.5px solid rgba(16, 35, 61, 0.12);
+  border-radius: 14px;
+  padding:       var(--sp-3) var(--sp-4);
+  font-family:   var(--font-body);
+  font-size:     0.8125rem;
+  line-height:   1.45;
+  color:         var(--color-ink);
+  box-shadow:    0 4px 20px rgba(16, 35, 61, 0.10);
+  white-space:   nowrap;
+  z-index:       var(--z-raised);
+  animation:     scale-in var(--duration-slow) var(--ease-out) 0.6s both;
+}
+
+/* Bubble tail pointing down toward head */
+.mascot-bubble::after {
+  content:      '';
+  position:     absolute;
+  bottom:       -9px;
+  left:         68%;
+  transform:    translateX(-50%);
+  border:       5px solid transparent;
+  border-top-color: var(--color-white);
+  filter:       drop-shadow(0 2px 1px rgba(16,35,61,0.08));
+}
+
+/* ── Feature cards section ────────────────────────────────────────────────── */
+
+.home-cards {
+  padding: 0 var(--sp-8) var(--sp-8);
+}
+
+/* Override feature-card heading size for home screen */
+.home-cards .feature-card__heading {
+  font-size: 0.9375rem;
+}
+
+/* Card label — small tag below the subtitle */
+.feature-card__tag {
+  display:        inline-block;
+  font-size:      0.6875rem;
+  font-weight:    600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color:          var(--color-ink-subtle);
+  margin-top:     var(--sp-1);
+}
+
+/* Clickable cards */
+.feature-card--clickable {
+  cursor: pointer;
+}
+
+.feature-card--clickable:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 3px;
+}
+
+/* ── Footer row ───────────────────────────────────────────────────────────── */
+
+.home-footer-row {
+  display:      flex;
+  align-items:  center;
+  justify-content: space-between;
+  padding:      var(--sp-4) var(--sp-8);
+  margin-top:   auto; /* push to bottom of panel */
+  border-top:   1px solid rgba(16, 35, 61, 0.06);
+}
+
+.home-footer-row .label {
+  color: var(--color-ink-subtle);
+}
+
+/* ── Command bar section ──────────────────────────────────────────────────── */
+
+.home-cmd {
+  padding: var(--sp-5) var(--sp-8) var(--sp-8);
+}
+
+/* Search results dropdown */
+.search-results {
+  margin-top:    var(--sp-3);
+  background:    var(--color-white);
+  border-radius: var(--radius-md);
+  border:        1px solid rgba(16, 35, 61, 0.08);
+  box-shadow:    var(--shadow-card);
+  overflow:      hidden;
+  animation:     fade-up var(--duration-base) var(--ease-out) both;
+}
+
+.search-result-item {
+  display:     flex;
+  align-items: center;
+  gap:         var(--sp-3);
+  padding:     var(--sp-3) var(--sp-4);
+  cursor:      pointer;
+  transition:  background var(--duration-fast);
+  border-bottom: 1px solid rgba(16, 35, 61, 0.05);
+  text-decoration: none;
+  color: inherit;
+}
+
+.search-result-item:last-child { border-bottom: none; }
+.search-result-item:hover { background: var(--color-surface-hover); }
+
+.search-result-thumb {
+  width:         44px;
+  height:        44px;
+  border-radius: var(--radius-sm);
+  object-fit:    cover;
+  background:    rgba(16, 35, 61, 0.06);
+  flex-shrink:   0;
+}
+
+.search-result-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-result-name {
+  font-weight:   600;
+  font-size:     0.875rem;
+  color:         var(--color-ink);
+  white-space:   nowrap;
+  overflow:      hidden;
+  text-overflow: ellipsis;
+}
+
+.search-result-score {
+  font-size: 0.75rem;
+  color:     var(--color-ink-muted);
+  margin-top: 2px;
+}
+
+.search-empty {
+  padding:    var(--sp-6) var(--sp-4);
+  text-align: center;
+  font-size:  0.875rem;
+  color:      var(--color-ink-muted);
+}
+
+/* ── Icon rail overrides for home screen ─────────────────────────────────── */
+/* (icon rail styles come from components.css; these are just home-page extras) */
+
+.home-nav-icon { font-size: 1.1rem; }
+
+/* ── Mascot keyframe animations ──────────────────────────────────────────── */
+
+@keyframes mascot-bob {
+  0%,  100% { transform: translateY(0px); }
+  50%        { transform: translateY(-7px); }
+}
+
+@keyframes mascot-eye-pulse {
+  0%,  100% { opacity: 0.3; }
+  50%        { opacity: 0.9; }
+}
+
+@keyframes mascot-chest-glow {
+  0%,  100% { opacity: 0.7; }
+  50%        { opacity: 1; }
+}
+
+@keyframes mascot-grid-blink {
+  0%,  100% { opacity: 0.55; }
+  50%        { opacity: 1; }
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1023px) {
+  .home-hero  { padding: var(--sp-8) var(--sp-6) var(--sp-6); gap: var(--sp-6); }
+  .home-cards { padding: 0 var(--sp-6) var(--sp-6); }
+  .home-cmd   { padding: var(--sp-4) var(--sp-6) var(--sp-6); }
+  .home-footer-row { padding: var(--sp-4) var(--sp-6); }
+  .mascot-svg { width: 120px; }
+}
+
+@media (max-width: 767px) {
+  .home-hero {
+    grid-template-columns: 1fr;
+    grid-template-rows:    auto auto;
+    text-align: center;
+    padding:    var(--sp-6) var(--sp-4) var(--sp-4);
+    gap:        var(--sp-5);
+  }
+  .hero-subtext { max-width: none; }
+  .hero-actions { justify-content: center; }
+  .mascot-wrapper {
+    order:          -1; /* mascot above headline on small screens */
+    justify-content: center;
+  }
+  .mascot-bubble {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .mascot-svg { width: 100px; }
+  .home-cards { padding: 0 var(--sp-4) var(--sp-4); }
+  .home-cmd   { padding: var(--sp-3) var(--sp-4) var(--sp-4); }
+  .home-footer-row { padding: var(--sp-3) var(--sp-4); flex-direction: column; gap: var(--sp-2); text-align: center; }
+}
+
+@media (max-width: 639px) {
+  .top-bar__title  { display: none; }  /* too cramped on mobile */
+  .home-panel      { min-height: auto; }
+}
