@@ -1,0 +1,29 @@
+{
+  "_comment": "Demo seed data manifest. Each entry pairs a drawing image with its pre-computed extraction JSON. The backend /api/demo endpoint returns these without any model API call.",
+  "examples": [
+    {
+      "id": "bracket",
+      "label": "Mounting Bracket",
+      "description": "Simple 3-view orthographic drawing of an Al 6061-T6 bracket with flatness and perpendicularity GD&T callouts.",
+      "image": "drawing_bracket.png",
+      "extraction": "drawing_bracket.json",
+      "tags": ["aluminum", "bracket", "GD&T", "flatness"]
+    },
+    {
+      "id": "shaft",
+      "label": "Drive Shaft",
+      "description": "Turned SS 304 shaft showing cylindricity, runout, and true-position callouts with tight bore tolerances.",
+      "image": "drawing_shaft.png",
+      "extraction": "drawing_shaft.json",
+      "tags": ["stainless", "shaft", "GD&T", "cylindricity", "runout"]
+    },
+    {
+      "id": "flange",
+      "label": "Flange Plate",
+      "description": "Mild steel flange with 6-bolt pattern, H7 bore, true-position callouts and sectional view.",
+      "image": "drawing_flange.png",
+      "extraction": "drawing_flange.json",
+      "tags": ["steel", "flange", "bolt-pattern", "GD&T", "true-position"]
+    }
+  ]
+}

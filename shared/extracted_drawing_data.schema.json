@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://blueprint-ai/schemas/extracted_drawing_data.schema.json",
+  "title": "ExtractedDrawingData",
+  "description": "Schema for data extracted from an engineering drawing by the Blueprint AI pipeline. All bbox coordinates are [x, y, w, h] normalized to [0, 1] relative to the image dimensions.",
+  "type": "object",
+  "required": [
+    "part_name",
+    "material",
+    "scale",
+    "revision",
+    "quantity",
+    "dimensions",
+    "gdt_callouts",
+    "surface_finish",
+    "notes"
+  ],
+  "properties": {
+    "part_name": {
+      "type": "string",
+      "description": "Name or identifier of the part shown in the drawing."
+    },
+    "material": {
+      "type": "string",
+      "description": "Material specification (e.g., 'Al 6061-T6', 'SS 304')."
+    },
+    "scale": {
+      "type": "string",
+      "description": "Drawing scale (e.g., '1:1', '1:2', 'NTS')."
+    },
+    "revision": {
+      "type": "string",
+      "description": "Drawing revision identifier (e.g., 'A', 'B', '01')."
+    },
+    "quantity": {
+      "type": "string",
+      "description": "Required quantity of the part (e.g., '1', '4', 'AS REQ')."
+    },
+    "dimensions": {
+      "type": "array",
+      "description": "List of dimensional annotations found in the drawing.",
+      "items": {
+        "$ref": "#/$defs/Dimension"
+      }
+    },
+    "gdt_callouts": {
+      "type": "array",
+      "description": "List of Geometric Dimensioning and Tolerancing (GD&T) feature control frames.",
+      "items": {
+        "$ref": "#/$defs/GDTCallout"
+      }
+    },
+    "surface_finish": {
+      "type": "array",
+      "description": "List of surface finish / roughness symbols annotated on the drawing.",
+      "items": {
+        "$ref": "#/$defs/SurfaceFinish"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "description": "General notes or flags captured from the drawing title block or note field.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "BoundingBox": {
+      "type": "array",
+      "description": "Normalized bounding box [x, y, width, height] relative to image dimensions (values in [0, 1]).",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "Dimension": {
+      "type": "object",
+      "description": "A single dimensional annotation.",
+      "required": ["value", "tolerance", "bbox"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Nominal dimension value as a string (e.g., '25.4', '1.000')."
+        },
+        "tolerance": {
+          "type": "string",
+          "description": "Tolerance string (e.g., '+0.1/-0.0', '±0.05', 'REF')."
+        },
+        "bbox": {
+          "$ref": "#/$defs/BoundingBox"
+        }
+      }
+    },
+    "GDTCallout": {
+      "type": "object",
+      "description": "A GD&T feature control frame annotation.",
+      "required": ["characteristic", "tolerance_zone", "datum_refs", "bbox"],
+      "properties": {
+        "characteristic": {
+          "type": "string",
+          "description": "GD&T characteristic symbol name (e.g., 'flatness', 'true position', 'cylindricity')."
+        },
+        "tolerance_zone": {
+          "type": "string",
+          "description": "Tolerance zone value (e.g., '0.05', 'Ø0.1 M')."
+        },
+        "datum_refs": {
+          "type": "string",
+          "description": "Referenced datums as a single string (e.g., 'A|B|C', 'A', '')."
+        },
+        "bbox": {
+          "$ref": "#/$defs/BoundingBox"
+        }
+      }
+    },
+    "SurfaceFinish": {
+      "type": "object",
+      "description": "A surface finish / roughness annotation.",
+      "required": ["value", "bbox"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "Surface roughness value (e.g., 'Ra 1.6', '63 μin', '√')."
+        },
+        "bbox": {
+          "$ref": "#/$defs/BoundingBox"
+        }
+      }
+    }
+  }
+}

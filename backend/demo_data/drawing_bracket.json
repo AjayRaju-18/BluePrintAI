@@ -1,0 +1,38 @@
+{
+  "part_name": "Mounting Bracket",
+  "material": "Al 6061-T6",
+  "scale": "1:1",
+  "revision": "A",
+  "quantity": "4",
+  "dimensions": [
+    { "value": "25.40",  "tolerance": "±0.05",       "bbox": [0.12, 0.18, 0.10, 0.03] },
+    { "value": "50.80",  "tolerance": "±0.10",       "bbox": [0.25, 0.30, 0.10, 0.03] },
+    { "value": "12.70",  "tolerance": "+0.00/-0.05", "bbox": [0.55, 0.22, 0.10, 0.03] },
+    { "value": "6.35",   "tolerance": "±0.03",       "bbox": [0.38, 0.45, 0.08, 0.03] },
+    { "value": "76.20",  "tolerance": "±0.10",       "bbox": [0.18, 0.55, 0.12, 0.03] }
+  ],
+  "gdt_callouts": [
+    {
+      "characteristic": "flatness",
+      "tolerance_zone": "0.02",
+      "datum_refs": "A",
+      "bbox": [0.30, 0.60, 0.12, 0.04]
+    },
+    {
+      "characteristic": "perpendicularity",
+      "tolerance_zone": "0.05",
+      "datum_refs": "A|B",
+      "bbox": [0.48, 0.38, 0.13, 0.04]
+    }
+  ],
+  "surface_finish": [
+    { "value": "Ra 1.6", "bbox": [0.62, 0.28, 0.06, 0.04] },
+    { "value": "Ra 3.2", "bbox": [0.70, 0.50, 0.06, 0.04] }
+  ],
+  "notes": [
+    "ALL SHARP EDGES TO BE BROKEN 0.5 MAX",
+    "ANODIZE PER MIL-A-8625 TYPE II, CLASS 1",
+    "DIMENSIONS IN MILLIMETERS UNLESS OTHERWISE STATED",
+    "TOLERANCES: LINEAR ±0.1, ANGULAR ±0.5°"
+  ]
+}

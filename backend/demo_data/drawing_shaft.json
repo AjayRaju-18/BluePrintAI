@@ -1,0 +1,45 @@
+{
+  "part_name": "Drive Shaft",
+  "material": "SS 304",
+  "scale": "1:2",
+  "revision": "B",
+  "quantity": "1",
+  "dimensions": [
+    { "value": "Ø25.0",  "tolerance": "+0.000/-0.013", "bbox": [0.15, 0.25, 0.14, 0.03] },
+    { "value": "Ø12.0",  "tolerance": "±0.010",        "bbox": [0.55, 0.25, 0.12, 0.03] },
+    { "value": "150.0",  "tolerance": "±0.10",          "bbox": [0.20, 0.60, 0.16, 0.03] },
+    { "value": "45.0",   "tolerance": "±0.05",          "bbox": [0.58, 0.60, 0.10, 0.03] },
+    { "value": "4.0",    "tolerance": "+0.00/-0.02",    "bbox": [0.32, 0.40, 0.08, 0.03] }
+  ],
+  "gdt_callouts": [
+    {
+      "characteristic": "true position",
+      "tolerance_zone": "Ø0.05 M",
+      "datum_refs": "A|B",
+      "bbox": [0.22, 0.70, 0.15, 0.04]
+    },
+    {
+      "characteristic": "cylindricity",
+      "tolerance_zone": "0.008",
+      "datum_refs": "",
+      "bbox": [0.10, 0.35, 0.12, 0.04]
+    },
+    {
+      "characteristic": "runout",
+      "tolerance_zone": "0.025",
+      "datum_refs": "A",
+      "bbox": [0.60, 0.42, 0.12, 0.04]
+    }
+  ],
+  "surface_finish": [
+    { "value": "Ra 0.8", "bbox": [0.18, 0.20, 0.06, 0.04] },
+    { "value": "Ra 1.6", "bbox": [0.62, 0.20, 0.06, 0.04] }
+  ],
+  "notes": [
+    "GRIND JOURNALS TO FINISH SIZE AFTER HEAT TREATMENT",
+    "MATERIAL: AISI 304 STAINLESS PER ASTM A276",
+    "HEAT TREAT: SOLUTION ANNEAL 1040°C, WATER QUENCH",
+    "DYNAMIC BALANCE G6.3 PER ISO 1940 AT 3000 RPM",
+    "ALL DIMENSIONS IN MILLIMETERS"
+  ]
+}

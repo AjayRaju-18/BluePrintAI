@@ -1,0 +1,39 @@
+{
+  "part_name": "Flange Plate",
+  "material": "MS A36",
+  "scale": "1:1",
+  "revision": "C",
+  "quantity": "2",
+  "dimensions": [
+    { "value": "Ø150.0", "tolerance": "±0.20",        "bbox": [0.20, 0.15, 0.14, 0.03] },
+    { "value": "Ø100.0", "tolerance": "±0.10",        "bbox": [0.30, 0.28, 0.12, 0.03] },
+    { "value": "Ø30.0",  "tolerance": "H7 (+0.021/0.000)", "bbox": [0.42, 0.42, 0.14, 0.03] },
+    { "value": "Ø10.0",  "tolerance": "+0.018/0.000", "bbox": [0.60, 0.22, 0.12, 0.03] },
+    { "value": "12.0",   "tolerance": "±0.10",        "bbox": [0.22, 0.65, 0.10, 0.03] }
+  ],
+  "gdt_callouts": [
+    {
+      "characteristic": "true position",
+      "tolerance_zone": "Ø0.2 M",
+      "datum_refs": "A|B|C",
+      "bbox": [0.55, 0.55, 0.16, 0.04]
+    },
+    {
+      "characteristic": "flatness",
+      "tolerance_zone": "0.05",
+      "datum_refs": "A",
+      "bbox": [0.18, 0.72, 0.12, 0.04]
+    }
+  ],
+  "surface_finish": [
+    { "value": "Ra 3.2", "bbox": [0.65, 0.12, 0.06, 0.04] },
+    { "value": "Ra 1.6", "bbox": [0.40, 0.55, 0.06, 0.04] }
+  ],
+  "notes": [
+    "6x Ø10 HOLES EQUALLY SPACED ON Ø100 B.C.",
+    "DEBURR ALL EDGES",
+    "PAINT: PRIMER + EPOXY TOPCOAT PER SPEC 42-B",
+    "WELD INSPECTION PER AWS D1.1",
+    "ALL DIMENSIONS IN MILLIMETERS UNLESS NOTED"
+  ]
+}
