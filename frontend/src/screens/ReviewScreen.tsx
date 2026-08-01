@@ -31,14 +31,14 @@ export default function ReviewScreen({ upload, onBack }: ReviewScreenProps) {
               ← Back
             </button>
             <span className="review-nav__title">
-              {isLoading ? 'Processing…' : isDone ? (data?.part_name || 'Extraction Result') : 'Error'}
+              {isLoading ? 'Processing…' : (isDone && extraction?.status === 'ok') ? (data?.part_name || 'Extraction Result') : 'Error'}
             </span>
             {extraction?.source === 'demo_fallback' && (
               <span className="source-badge source-badge--demo" title="HF API was unavailable; showing pre-computed demo result">
                 ⚠ Demo result
               </span>
             )}
-            {extraction?.source === 'hf_api' && isDone && (
+            {extraction?.source === 'hf_api' && isDone && extraction?.status === 'ok' && (
               <span className="source-badge source-badge--live">
                 ✓ Live extraction
               </span>
